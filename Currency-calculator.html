@@ -10,6 +10,7 @@
         :root {
             --primary: #1e3799;
             --accent: #f6b93b;
+            --danger: #eb4d4b;
         }
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
@@ -51,6 +52,19 @@
             text-align: center;
         }
         .blue-toggle input { width: auto; vertical-align: middle; margin-left: 8px; }
+        .btn-reset {
+            width: 100%;
+            padding: 10px;
+            background-color: #f1f2f6;
+            border: 1px solid #dcdde1;
+            border-radius: 10px;
+            color: #7f8c8d;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        .btn-reset:hover { background-color: #dfe4ea; color: var(--danger); }
         .footer { text-align: center; font-size: 0.8rem; color: #7f8c8d; margin-top: 15px; }
     </style>
 </head>
@@ -98,6 +112,8 @@
         <input type="number" id="dynamic-input" placeholder="0.00" oninput="calculate('dynamic')">
     </div>
 
+    <button class="btn-reset" onclick="resetAll()">נקה הכל 🗑️</button>
+
     <div class="footer" id="status">מעדכן שערים...</div>
 </div>
 
@@ -124,6 +140,14 @@
         
         const country = select.value;
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
+    }
+
+    function resetAll() {
+        document.getElementById('ils').value = "";
+        document.getElementById('usd').value = "";
+        document.getElementById('dynamic-input').value = "";
+        document.getElementById('is-blue').checked = false;
+        calculate('ils');
     }
 
     function calculate(source) {
@@ -155,7 +179,7 @@
 
         if (source !== 'ils') ilsEl.value = baseIls.toFixed(2);
         if (source !== 'usd') usdEl.value = (baseIls * rates.usd).toFixed(2);
-        if (source !== 'dynamic') dynEl.value = (baseIls * currentRate).toFixed(0);
+        if (source !== 'dynamic') dynEl.value = (baseIls * currentRate).toFixed(2);
     }
 
     getRates();
@@ -163,6 +187,7 @@
 
 </body>
 </html>
+
 
 
 
