@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מחשבון המרה - דרום אמריקה וארגנטינה בלו</title>
+    <title>מחשבון המרה - דרום אמריקה עם דגלים</title>
     <style>
         :root {
             --primary: #1e3799;
@@ -22,77 +22,79 @@
         .card {
             background: white;
             padding: 30px;
-            border-radius: 20px;
+            border-radius: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 400px;
         }
         .main-group { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e9ecef; }
         .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #2f3640; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.95rem; color: #2f3640; }
         input, select {
             width: 100%;
             padding: 12px;
             border: 2px solid #dcdde1;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1rem;
             box-sizing: border-box;
         }
         input:focus { border-color: var(--primary); outline: none; }
         .blue-toggle {
-            display: none; /* יופיע רק בארגנטינה */
+            display: none;
             background: #e1f5fe;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 10px;
             margin-bottom: 15px;
             border: 1px solid #b3e5fc;
             text-align: center;
         }
-        .blue-toggle input { width: auto; cursor: pointer; }
-        .footer { text-align: center; font-size: 0.75rem; color: #7f8c8d; margin-top: 15px; }
+        .blue-toggle input { width: auto; vertical-align: middle; margin-left: 8px; }
+        .footer { text-align: center; font-size: 0.8rem; color: #7f8c8d; margin-top: 15px; }
+        .flag { margin-left: 5px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 style="text-align:center; margin-top:0;">מחשבון מטייל 🌎</h2>
+    <h2 style="text-align:center; margin-top:0;">מחשבון המרה לטיול 🗺️</h2>
     
     <div class="main-group">
         <div class="input-group">
-            <label>שקל חדש (ILS ₪)</label>
+            <label><span class="flag">🇮🇱</span> שקל חדש (ILS)</label>
             <input type="number" id="ils" placeholder="0.00" oninput="calculate('ils')">
         </div>
         <div class="input-group">
-            <label>דולר אמריקאי (USD $)</label>
+            <label><span class="flag">🇺🇸</span> דולר אמריקאי (USD)</label>
             <input type="number" id="usd" placeholder="0.00" oninput="calculate('usd')">
         </div>
     </div>
 
     <div class="input-group">
-        <label>בחר מטבע מקומי:</label>
+        <label>בחר יעד לביקור:</label>
         <select id="country-select" onchange="toggleBlueMode(); calculate('ils');">
-            <option value="brl">ברזיל (BRL R$)</option>
-            <option value="ars" selected>ארגנטינה (ARS $)</option>
-            <option value="clp">צ'ילה (CLP $)</option>
-            <option value="pen">פרו (PEN S/.)</option>
-            <option value="cop">קולומביה (COP $)</option>
-            <option value="bob">בוליביה (BOB Bs.)</option>
-            <option value="uyu">אורוגוואי (UYU $U)</option>
-            <option value="pyg">פרגוואי (PYG ₲)</option>
+            <option value="brl">🇧🇷 ברזיל (BRL)</option>
+            <option value="ars" selected>🇦🇷 ארגנטינה (ARS)</option>
+            <option value="clp">🇨🇱 צ'ילה (CLP)</option>
+            <option value="pen">🇵🇪 פרו (PEN)</option>
+            <option value="cop">🇨🇴 קולומביה (COP)</option>
+            <option value="bob">🇧🇴 בוליביה (BOB)</option>
+            <option value="uyu">🇺🇾 אורוגוואי (UYU)</option>
+            <option value="pyg">🇵🇾 פרגוואי (PYG)</option>
+            <option value="usd">🇪🇨 אקוודור (USD)</option>
         </select>
     </div>
 
     <div id="blue-area" class="blue-toggle">
         <input type="checkbox" id="is-blue" onchange="calculate('ils')">
-        <label style="display:inline; color:#01579b;">השתמש בשער "בלו" (שוק חופשי)</label>
+        <label style="display:inline; color:#01579b; font-weight: bold;">שער "בלו" (Dólar Blue) 💵</label>
     </div>
 
     <div class="input-group">
-        <label id="dynamic-label">סכום במטבע מקומי</label>
+        <label id="dynamic-label">סכום במטבע המקומי</label>
         <input type="number" id="dynamic-input" placeholder="0.00" oninput="calculate('dynamic')">
     </div>
 
-    <div class="footer" id="status">טוען שערים מהרשת...</div>
+    <div class="footer" id="status">מעדכן שערים...</div>
 </div>
 
 <script>
@@ -103,11 +105,11 @@
             const res = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/ils.json');
             const data = await res.json();
             rates = data.ils;
-            document.getElementById('status').innerText = "שערים מעודכנים ✅";
+            document.getElementById('status').innerText = "שערים מעודכנים בזמן אמת ✅";
             toggleBlueMode();
             calculate('ils');
         } catch (e) {
-            document.getElementById('status').innerText = "שגיאת חיבור. נסה שוב.";
+            document.getElementById('status').innerText = "שגיאה. וודא שיש חיבור לאינטרנט.";
         }
     }
 
@@ -127,9 +129,9 @@
 
         let currentRate = rates[currency];
         
-        // תיקון שער בלו לארגנטינה (מכפיל משוער לפי המצב הנוכחי)
+        // הערכה לשער הבלו בארגנטינה
         if (currency === 'ars' && isBlue) {
-            currentRate = currentRate * 1.25; // הערה: השער משתנה כל יום, ב-2026 היחס עשוי להשתנות
+            currentRate = currentRate * 1.25; 
         }
 
         let baseIls;
@@ -137,7 +139,12 @@
         else if (source === 'usd') baseIls = parseFloat(usdEl.value) / rates.usd;
         else if (source === 'dynamic') baseIls = parseFloat(dynEl.value) / currentRate;
 
-        if (isNaN(baseIls)) return;
+        if (isNaN(baseIls)) {
+             if(source !== 'ils') ilsEl.value = "";
+             if(source !== 'usd') usdEl.value = "";
+             if(source !== 'dynamic') dynEl.value = "";
+             return;
+        }
 
         if (source !== 'ils') ilsEl.value = baseIls.toFixed(2);
         if (source !== 'usd') usdEl.value = (baseIls * rates.usd).toFixed(2);
@@ -149,4 +156,5 @@
 
 </body>
 </html>
+
 
