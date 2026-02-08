@@ -67,15 +67,16 @@
         .btn-reset:hover { background-color: #dfe4ea; color: var(--danger); }
         .footer { text-align: center; font-size: 0.8rem; color: #7f8c8d; margin-top: 15px; }
 
-        /* עיצוב לשדה הנסתר שתפקידו "להרוג" את המקלדת */
-        .keyboard-killer {
+        /* שדה "מלכודת" בלתי נראה לחלוטין */
+        .trap {
+            position: absolute;
             opacity: 0;
             height: 0;
             width: 0;
             border: none;
             padding: 0;
             margin: 0;
-            position: absolute;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -90,7 +91,7 @@
             <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="handleEnter(event)">
         </div>
 
-        <select class="keyboard-killer" id="killer-1"></select>
+        <input type="text" class="trap" id="trap-1" onfocus="this.blur()">
 
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
@@ -98,7 +99,7 @@
         </div>
     </div>
 
-    <select class="keyboard-killer" id="killer-2"></select>
+    <input type="text" class="trap" id="trap-2" onfocus="this.blur()">
 
     <div class="input-group">
         <label>בחר יעד לביקור:</label>
@@ -156,22 +157,14 @@
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
     }
 
-    // הפונקציה שמשתמשת ברעיון שלך - קפיצה לשדה "קוטל מקלדת"
+    // פונקציית האנטר ששולחת את הפוקוס למלכודת
     function handleEnter(event) {
         if (event.key === "Enter") {
             event.preventDefault();
-            
-            // אנחנו תמיד שולחים את הפוקוס לשדה Select נסתר
-            // זה "מרמה" את הדפדפן לחשוב שעברנו לאלמנט בחירה וסוגר מקלדת
-            const killer = document.getElementById('killer-1');
-            killer.focus();
-            
-            setTimeout(() => {
-                killer.blur();
-                // אם אתה רוצה שהפוקוס יחזור לשדה בחירת המדינה (כדי לוודא סגירה)
-                document.getElementById('country-select').focus();
-                setTimeout(() => document.getElementById('country-select').blur(), 50);
-            }, 50);
+            // שליחת פוקוס למלכודת הקרובה ביותר
+            const trap = document.getElementById('trap-1');
+            trap.focus(); 
+            // המלכודת עצמה מוגדרת (ב-HTML) לבצע blur ברגע שהיא מקבלת פוקוס
         }
     }
 
@@ -220,7 +213,6 @@
 
 </body>
 </html>
-
 
 
 
