@@ -73,44 +73,50 @@
 <div class="card">
     <h2 style="text-align:center; margin-top:0;">מחשבון המרה לטיול 🗺️</h2>
     
-    <div class="main-group">
-        <div class="input-group">
-            <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
-            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeypress="handleEnter(event)">
+    <form onsubmit="event.preventDefault(); document.activeElement.blur(); return false;">
+        
+        <div class="main-group">
+            <div class="input-group">
+                <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
+                <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')">
+            </div>
+            <div class="input-group">
+                <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
+                <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')">
+            </div>
         </div>
+
         <div class="input-group">
-            <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
-            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeypress="handleEnter(event)">
+            <label>בחר יעד לביקור:</label>
+            <select id="country-select" onchange="updateFlag(); calculate('ils');">
+                <option value="brl" data-flag="br" selected>🇧🇷 ברזיל (BRL)</option>
+                <option value="ars" data-flag="ar">🇦🇷 ארגנטינה (ARS)</option>
+                <option value="clp" data-flag="cl">🇨🇱 צ'ילה (CLP)</option>
+                <option value="pen" data-flag="pe">🇵🇪 פרו (PEN)</option>
+                <option value="cop" data-flag="co">🇨🇴 קולומביה (COP)</option>
+                <option value="bob" data-flag="bo">🇧🇴 בוליביה (BOB)</option>
+                <option value="uyu" data-flag="uy">🇺🇾 אורוגוואי (UYU)</option>
+                <option value="pyg" data-flag="py">🇵🇾 פרגוואי (PYG)</option>
+                <option value="usd" data-flag="ec">🇪🇨 אקוודור (USD)</option>
+            </select>
         </div>
-    </div>
 
-    <div class="input-group">
-        <label>בחר יעד לביקור:</label>
-        <select id="country-select" onchange="updateFlag(); calculate('ils');">
-            <option value="brl" data-flag="br" selected>🇧🇷 ברזיל (BRL)</option>
-            <option value="ars" data-flag="ar">🇦🇷 ארגנטינה (ARS)</option>
-            <option value="clp" data-flag="cl">🇨🇱 צ'ילה (CLP)</option>
-            <option value="pen" data-flag="pe">🇵🇪 פרו (PEN)</option>
-            <option value="cop" data-flag="co">🇨🇴 קולומביה (COP)</option>
-            <option value="bob" data-flag="bo">🇧🇴 בוליביה (BOB)</option>
-            <option value="uyu" data-flag="uy">🇺🇾 אורוגוואי (UYU)</option>
-            <option value="pyg" data-flag="py">🇵🇾 פרגוואי (PYG)</option>
-            <option value="usd" data-flag="ec">🇪🇨 אקוודור (USD)</option>
-        </select>
-    </div>
+        <div id="blue-area" class="blue-toggle">
+            <input type="checkbox" id="is-blue" onchange="calculate('ils')">
+            <label style="display:inline; color:#01579b; font-weight: bold;">שער "בלו" (Dólar Blue) 💵</label>
+        </div>
 
-    <div id="blue-area" class="blue-toggle">
-        <input type="checkbox" id="is-blue" onchange="calculate('ils')">
-        <label style="display:inline; color:#01579b; font-weight: bold;">שער "בלו" (Dólar Blue) 💵</label>
-    </div>
+        <div class="input-group">
+            <label id="dynamic-label">
+                <img id="dest-flag" src="https://flagcdn.com/w40/br.png" class="flag-img">
+                <span>סכום במטבע מקומי</span>
+            </label>
+            <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')">
+        </div>
 
-    <div class="input-group">
-        <label id="dynamic-label">
-            <img id="dest-flag" src="https://flagcdn.com/w40/br.png" class="flag-img">
-            <span>סכום במטבע מקומי</span>
-        </label>
-        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeypress="handleEnter(event)">
-    </div>
+        <input type="submit" style="display:none;">
+
+    </form>
 
     <button class="btn-reset" onclick="resetAll()">נקה הכל 🗑️</button>
 
@@ -139,18 +145,6 @@
         
         const country = select.value;
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
-    }
-
-    // פתרון סופי להורדת מקלדת: הופך את השדה ל-readonly לרגע
-    function handleEnter(event) {
-        if (event.key === "Enter") {
-            const el = event.target;
-            el.readOnly = true; 
-            setTimeout(() => {
-                el.blur();
-                el.readOnly = false;
-            }, 50);
-        }
     }
 
     function resetAll() {
