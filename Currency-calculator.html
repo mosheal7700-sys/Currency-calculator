@@ -66,9 +66,20 @@
         }
         .btn-reset:hover { background-color: #dfe4ea; color: var(--danger); }
         .footer { text-align: center; font-size: 0.8rem; color: #7f8c8d; margin-top: 15px; }
+        
+        /* אלמנט נסתר שמושך את הפוקוס כדי לסגור מקלדת */
+        #keyboard-killer {
+            position: absolute;
+            opacity: 0;
+            height: 0;
+            width: 0;
+            border: none;
+        }
     </style>
 </head>
 <body>
+
+<button id="keyboard-killer"></button>
 
 <div class="card">
     <h2 style="text-align:center; margin-top:0;">מחשבון המרה לטיול 🗺️</h2>
@@ -76,11 +87,11 @@
     <div class="main-group">
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
-            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeyup="handleEnter(event)">
+            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="handleEnter(event)">
         </div>
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
-            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeyup="handleEnter(event)">
+            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeydown="handleEnter(event)">
         </div>
     </div>
 
@@ -109,7 +120,7 @@
             <img id="dest-flag" src="https://flagcdn.com/w40/br.png" class="flag-img">
             <span>סכום במטבע מקומי</span>
         </label>
-        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeyup="handleEnter(event)">
+        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeydown="handleEnter(event)">
     </div>
 
     <button class="btn-reset" onclick="resetAll()">נקה הכל 🗑️</button>
@@ -135,18 +146,20 @@
 
     function updateFlag() {
         const select = document.getElementById('country-select');
-        const flagCode = select.options[select.selectedIndex].getAttribute('data-flag');
+        const flagCode = select.options[select.selectedIndex].getAttribute).getAttribute('data-flag');
         document.getElementById('dest-flag').src = `https://flagcdn.com/w40/${flagCode}.png`;
         
         const country = select.value;
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
     }
 
-    // פונקציה אגרסיבית יותר לסגירת מקלדת
+    // הפונקציה החדשה "מושכת" את הפוקוס לכפתור הנסתר
     function handleEnter(event) {
-        if (event.key === "Enter" || event.keyCode === 13) {
+        if (event.key === "Enter") {
             event.preventDefault();
-            event.target.blur(); // הוראה מפורשת לדפדפן לעזוב את השדה
+            const killer = document.getElementById('keyboard-killer');
+            killer.focus(); // מעביר פוקוס לכפתור הנסתר
+            setTimeout(() => killer.blur(), 100); // מוודא שהפוקוס משתחרר לגמרי
         }
     }
 
@@ -195,7 +208,6 @@
 
 </body>
 </html>
-
 
 
 
