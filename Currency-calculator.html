@@ -39,7 +39,6 @@
             border-radius: 10px;
             font-size: 1rem;
             box-sizing: border-box;
-            -webkit-appearance: none; /* מסיר עיצוב דפדפן מקורי באייפון */
         }
         input:focus { border-color: var(--primary); outline: none; }
         .flag-img { width: 24px; height: 18px; margin-left: 10px; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -77,11 +76,11 @@
     <div class="main-group">
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
-            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeypress="handleEnter(event)">
+            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="handleEnter(event)">
         </div>
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
-            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeypress="handleEnter(event)">
+            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeydown="handleEnter(event)">
         </div>
     </div>
 
@@ -110,7 +109,7 @@
             <img id="dest-flag" src="https://flagcdn.com/w40/br.png" class="flag-img">
             <span>סכום במטבע מקומי</span>
         </label>
-        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeypress="handleEnter(event)">
+        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeydown="handleEnter(event)">
     </div>
 
     <button class="btn-reset" onclick="resetAll()">נקה הכל 🗑️</button>
@@ -142,16 +141,18 @@
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
     }
 
-    // פונקציית סגירת מקלדת אגרסיבית
+    // הפונקציה שמעבירה פוקוס לבחירת המדינה
     function handleEnter(event) {
-        if (event.key === "Enter" || event.keyCode === 13) {
+        if (event.key === "Enter") {
             event.preventDefault();
-            // פקודה גורפת לסגירת המקלדת על ידי הסרת פוקוס מכל אלמנט פעיל
-            if (document.activeElement) {
-                document.activeElement.blur();
-            }
-            // גיבוי נוסף למקרה שהדפדפן מנסה להחזיר פוקוס
-            window.focus();
+            // מעביר פוקוס לשדה ה-Select
+            const countrySelect = document.getElementById('country-select');
+            countrySelect.focus();
+            
+            // בחלק מהמכשירים ה-Select משאיר מקלדת אם לא עושים לו blur קטן אחרי
+            setTimeout(() => {
+                countrySelect.blur();
+            }, 100);
         }
     }
 
@@ -200,8 +201,6 @@
 
 </body>
 </html>
-
-
 
 
 
