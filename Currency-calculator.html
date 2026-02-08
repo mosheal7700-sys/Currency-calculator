@@ -76,11 +76,11 @@
     <div class="main-group">
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
-            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="handleEnter(event)">
+            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur(); document.getElementById('country-select').focus();}">
         </div>
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
-            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeydown="handleEnter(event)">
+            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur(); document.getElementById('country-select').focus();}">
         </div>
     </div>
 
@@ -109,7 +109,7 @@
             <img id="dest-flag" src="https://flagcdn.com/w40/br.png" class="flag-img">
             <span>סכום במטבע מקומי</span>
         </label>
-        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeydown="handleEnter(event)">
+        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur(); document.getElementById('country-select').focus();}">
     </div>
 
     <button class="btn-reset" onclick="resetAll()">נקה הכל 🗑️</button>
@@ -139,21 +139,9 @@
         
         const country = select.value;
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
-    }
-
-    // הפונקציה שמעבירה פוקוס לבחירת המדינה
-    function handleEnter(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            // מעביר פוקוס לשדה ה-Select
-            const countrySelect = document.getElementById('country-select');
-            countrySelect.focus();
-            
-            // בחלק מהמכשירים ה-Select משאיר מקלדת אם לא עושים לו blur קטן אחרי
-            setTimeout(() => {
-                countrySelect.blur();
-            }, 100);
-        }
+        
+        // ברגע שהפוקוס מגיע לכאן (מה-Enter), אנחנו דואגים שהוא "ייצא" מיד כדי לסגור מקלדת
+        setTimeout(() => { select.blur(); }, 50);
     }
 
     function resetAll() {
@@ -201,7 +189,6 @@
 
 </body>
 </html>
-
 
 
 
