@@ -76,11 +76,11 @@
     <div class="main-group">
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
-            <input type="number" id="ils" placeholder="0.00" oninput="calculate('ils')">
+            <input type="number" id="ils" placeholder="0.00" oninput="calculate('ils')" onkeydown="handleEnter(event)">
         </div>
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
-            <input type="number" id="usd" placeholder="0.00" oninput="calculate('usd')">
+            <input type="number" id="usd" placeholder="0.00" oninput="calculate('usd')" onkeydown="handleEnter(event)">
         </div>
     </div>
 
@@ -109,7 +109,7 @@
             <img id="dest-flag" src="https://flagcdn.com/w40/br.png" class="flag-img">
             <span>סכום במטבע מקומי</span>
         </label>
-        <input type="number" id="dynamic-input" placeholder="0.00" oninput="calculate('dynamic')">
+        <input type="number" id="dynamic-input" placeholder="0.00" oninput="calculate('dynamic')" onkeydown="handleEnter(event)">
     </div>
 
     <button class="btn-reset" onclick="resetAll()">נקה הכל 🗑️</button>
@@ -140,6 +140,14 @@
         
         const country = select.value;
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
+    }
+
+    // פונקציה משופרת לסגירת מקלדת
+    function handleEnter(event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // מונע מעבר לשדה הבא
+            event.target.blur();    // מסיר פוקוס וסוגר מקלדת
+        }
     }
 
     function resetAll() {
@@ -187,6 +195,7 @@
 
 </body>
 </html>
+
 
 
 
