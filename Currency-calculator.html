@@ -66,6 +66,17 @@
         }
         .btn-reset:hover { background-color: #dfe4ea; color: var(--danger); }
         .footer { text-align: center; font-size: 0.8rem; color: #7f8c8d; margin-top: 15px; }
+
+        /* עיצוב לשדה הנסתר שתפקידו "להרוג" את המקלדת */
+        .keyboard-killer {
+            opacity: 0;
+            height: 0;
+            width: 0;
+            border: none;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+        }
     </style>
 </head>
 <body>
@@ -76,13 +87,18 @@
     <div class="main-group">
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
-            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur(); document.getElementById('country-select').focus();}">
+            <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="handleEnter(event)">
         </div>
+
+        <select class="keyboard-killer" id="killer-1"></select>
+
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
-            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur(); document.getElementById('country-select').focus();}">
+            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeydown="handleEnter(event)">
         </div>
     </div>
+
+    <select class="keyboard-killer" id="killer-2"></select>
 
     <div class="input-group">
         <label>בחר יעד לביקור:</label>
@@ -109,7 +125,7 @@
             <img id="dest-flag" src="https://flagcdn.com/w40/br.png" class="flag-img">
             <span>סכום במטבע מקומי</span>
         </label>
-        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur(); document.getElementById('country-select').focus();}">
+        <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeydown="handleEnter(event)">
     </div>
 
     <button class="btn-reset" onclick="resetAll()">נקה הכל 🗑️</button>
@@ -136,12 +152,27 @@
         const select = document.getElementById('country-select');
         const flagCode = select.options[select.selectedIndex].getAttribute('data-flag');
         document.getElementById('dest-flag').src = `https://flagcdn.com/w40/${flagCode}.png`;
-        
         const country = select.value;
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
-        
-        // ברגע שהפוקוס מגיע לכאן (מה-Enter), אנחנו דואגים שהוא "ייצא" מיד כדי לסגור מקלדת
-        setTimeout(() => { select.blur(); }, 50);
+    }
+
+    // הפונקציה שמשתמשת ברעיון שלך - קפיצה לשדה "קוטל מקלדת"
+    function handleEnter(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            
+            // אנחנו תמיד שולחים את הפוקוס לשדה Select נסתר
+            // זה "מרמה" את הדפדפן לחשוב שעברנו לאלמנט בחירה וסוגר מקלדת
+            const killer = document.getElementById('killer-1');
+            killer.focus();
+            
+            setTimeout(() => {
+                killer.blur();
+                // אם אתה רוצה שהפוקוס יחזור לשדה בחירת המדינה (כדי לוודא סגירה)
+                document.getElementById('country-select').focus();
+                setTimeout(() => document.getElementById('country-select').blur(), 50);
+            }, 50);
+        }
     }
 
     function resetAll() {
