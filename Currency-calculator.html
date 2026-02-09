@@ -66,18 +66,7 @@
         }
         .btn-reset:hover { background-color: #dfe4ea; color: var(--danger); }
         .footer { text-align: center; font-size: 0.8rem; color: #7f8c8d; margin-top: 15px; }
-
-        /* שדה "מלכודת" בלתי נראה לחלוטין */
-        .trap {
-            position: absolute;
-            opacity: 0;
-            height: 0;
-            width: 0;
-            border: none;
-            padding: 0;
-            margin: 0;
-            pointer-events: none;
-        }
+        .trap { position: absolute; opacity: 0; height: 0; width: 0; border: none; padding: 0; margin: 0; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -90,9 +79,7 @@
             <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
             <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="handleEnter(event)">
         </div>
-
         <input type="text" class="trap" id="trap-1" onfocus="this.blur()">
-
         <div class="input-group">
             <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
             <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeydown="handleEnter(event)">
@@ -103,7 +90,7 @@
 
     <div class="input-group">
         <label>בחר יעד לביקור:</label>
-        <select id="country-select" onchange="updateFlag(); calculate('ils');">
+        <select id="country-select" onchange="updateFlag(); savePreferences(); calculate('ils');">
             <option value="brl" data-flag="br" selected>🇧🇷 ברזיל (BRL)</option>
             <option value="ars" data-flag="ar">🇦🇷 ארגנטינה (ARS)</option>
             <option value="clp" data-flag="cl">🇨🇱 צ'ילה (CLP)</option>
@@ -117,7 +104,7 @@
     </div>
 
     <div id="blue-area" class="blue-toggle">
-        <input type="checkbox" id="is-blue" onchange="calculate('ils')">
+        <input type="checkbox" id="is-blue" onchange="savePreferences(); calculate('ils');">
         <label style="display:inline; color:#01579b; font-weight: bold;">שער "בלו" (Dólar Blue) 💵</label>
     </div>
 
@@ -129,8 +116,7 @@
         <input type="number" id="dynamic-input" inputmode="decimal" placeholder="0.00" oninput="calculate('dynamic')" onkeydown="handleEnter(event)">
     </div>
 
-    <button class="btn-reset" onclick="resetAll()">נקה הכל 🗑️</button>
-
+    <button class="btn-reset" onclick="resetAll()">נקה חישוב 🗑️</button>
     <div class="footer" id="status">מעדכן שערים...</div>
 </div>
 
@@ -143,10 +129,26 @@
             const data = await res.json();
             rates = data.ils;
             document.getElementById('status').innerText = "שערים מעודכנים ✅";
+            
+            loadPreferences();
             updateFlag();
         } catch (e) {
             document.getElementById('status').innerText = "שגיאת חיבור.";
         }
+    }
+
+    function savePreferences() {
+        const country = document.getElementById('country-select').value;
+        const isBlue = document.getElementById('is-blue').checked;
+        localStorage.setItem('selectedCountry', country);
+        localStorage.setItem('isBlueActive', isBlue);
+    }
+
+    function loadPreferences() {
+        const savedCountry = localStorage.getItem('selectedCountry');
+        const savedBlue = localStorage.getItem('isBlueActive');
+        if (savedCountry) document.getElementById('country-select').value = savedCountry;
+        if (savedBlue !== null) document.getElementById('is-blue').checked = (savedBlue === 'true');
     }
 
     function updateFlag() {
@@ -157,52 +159,40 @@
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
     }
 
-    // פונקציית האנטר ששולחת את הפוקוס למלכודת
     function handleEnter(event) {
         if (event.key === "Enter") {
             event.preventDefault();
-            // שליחת פוקוס למלכודת הקרובה ביותר
-            const trap = document.getElementById('trap-1');
-            trap.focus(); 
-            // המלכודת עצמה מוגדרת (ב-HTML) לבצע blur ברגע שהיא מקבלת פוקוס
+            document.getElementById('trap-1').focus(); 
         }
     }
 
+    // הפונקציה המעודכנת - מנקה רק את המספרים
     function resetAll() {
         document.getElementById('ils').value = "";
         document.getElementById('usd').value = "";
         document.getElementById('dynamic-input').value = "";
-        document.getElementById('is-blue').checked = false;
-        calculate('ils');
+        // לא מאפסים את המדינה ולא את ה-Checkbox, כך שהם נשמרים בזיכרון
     }
 
     function calculate(source) {
         if (!rates.usd) return;
-
         const ilsEl = document.getElementById('ils');
         const usdEl = document.getElementById('usd');
         const dynEl = document.getElementById('dynamic-input');
         const currency = document.getElementById('country-select').value;
         const isBlue = document.getElementById('is-blue').checked;
-
         let currentRate = rates[currency];
-        
-        if (currency === 'ars' && isBlue) {
-            currentRate = currentRate * 1.25; 
-        }
-
+        if (currency === 'ars' && isBlue) currentRate = currentRate * 1.25; 
         let baseIls;
         if (source === 'ils') baseIls = parseFloat(ilsEl.value);
         else if (source === 'usd') baseIls = parseFloat(usdEl.value) / rates.usd;
         else if (source === 'dynamic') baseIls = parseFloat(dynEl.value) / currentRate;
-
         if (isNaN(baseIls)) {
              if(source !== 'ils') ilsEl.value = "";
              if(source !== 'usd') usdEl.value = "";
              if(source !== 'dynamic') dynEl.value = "";
              return;
         }
-
         if (source !== 'ils') ilsEl.value = baseIls.toFixed(2);
         if (source !== 'usd') usdEl.value = (baseIls * rates.usd).toFixed(2);
         if (source !== 'dynamic') dynEl.value = (baseIls * currentRate).toFixed(2);
@@ -213,6 +203,7 @@
 
 </body>
 </html>
+
 
 
 
