@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מחשבון המרה - דרום אמריקה</title>
+    <title>מחשבון המרה - טיול</title>
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/201/201623.png">
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/201/201623.png"> 
     <style>
@@ -29,7 +29,13 @@
             width: 100%;
             max-width: 400px;
         }
-        .main-group { background: #f8f9fa; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e9ecef; }
+        .main-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
         .input-group { margin-bottom: 15px; }
         label { display: flex; align-items: center; margin-bottom: 8px; font-weight: 600; font-size: 0.95rem; color: #2f3640; }
         input, select {
@@ -42,6 +48,41 @@
         }
         input:focus { border-color: var(--primary); outline: none; }
         .flag-img { width: 24px; height: 18px; margin-left: 10px; border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* --- Currency toggle row --- */
+        .currency-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0;
+        }
+        .currency-row .input-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .swap-btn {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #dcdde1;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: transform 0.35s ease, border-color 0.2s, background 0.2s;
+            margin-top: 26px; /* align with inputs (label height) */
+            position: relative;
+        }
+        .swap-btn:hover {
+            border-color: var(--primary);
+            background: #e8ecf8;
+            transform: rotate(180deg);
+        }
+        .swap-btn:active { transform: rotate(180deg) scale(0.9); }
+
         .blue-toggle {
             display: none;
             background: #e1f5fe;
@@ -79,10 +120,19 @@
             <label><img src="https://flagcdn.com/w40/il.png" class="flag-img"> שקל חדש (ILS)</label>
             <input type="number" id="ils" inputmode="decimal" placeholder="0.00" oninput="calculate('ils')" onkeydown="handleEnter(event)">
         </div>
+
         <input type="text" class="trap" id="trap-1" onfocus="this.blur()">
-        <div class="input-group">
-            <label><img src="https://flagcdn.com/w40/us.png" class="flag-img"> דולר אמריקאי (USD)</label>
-            <input type="number" id="usd" inputmode="decimal" placeholder="0.00" oninput="calculate('usd')" onkeydown="handleEnter(event)">
+
+        <!-- USD / EUR row with swap button -->
+        <div class="currency-row">
+            <div class="input-group">
+                <label id="second-label">
+                    <img id="second-flag" src="https://flagcdn.com/w40/us.png" class="flag-img">
+                    <span id="second-label-text">דולר אמריקאי (USD)</span>
+                </label>
+                <input type="number" id="second-currency" inputmode="decimal" placeholder="0.00" oninput="calculate('second')" onkeydown="handleEnter(event)">
+            </div>
+            <button class="swap-btn" onclick="swapSecondCurrency()" title="החלף בין דולר ויורו">⇄</button>
         </div>
     </div>
 
@@ -100,6 +150,7 @@
             <option value="uyu" data-flag="uy">🇺🇾 אורוגוואי (UYU)</option>
             <option value="pyg" data-flag="py">🇵🇾 פרגוואי (PYG)</option>
             <option value="usd" data-flag="ec">🇪🇨 אקוודור (USD)</option>
+            <option value="vnd" data-flag="vn">🇻🇳 ויאטנם (VND)</option>
         </select>
     </div>
 
@@ -122,6 +173,21 @@
 
 <script>
     let rates = {};
+    // 'usd' or 'eur'
+    let secondCurrency = 'usd';
+
+    const secondConfig = {
+        usd: {
+            flag: 'us',
+            label: 'דולר אמריקאי (USD)',
+            rateKey: 'usd'
+        },
+        eur: {
+            flag: 'eu',
+            label: 'יורו (EUR)',
+            rateKey: 'eur'
+        }
+    };
 
     async function getRates() {
         try {
@@ -129,9 +195,9 @@
             const data = await res.json();
             rates = data.ils;
             document.getElementById('status').innerText = "שערים מעודכנים ✅";
-            
             loadPreferences();
             updateFlag();
+            updateSecondCurrencyUI();
         } catch (e) {
             document.getElementById('status').innerText = "שגיאת חיבור.";
         }
@@ -142,13 +208,16 @@
         const isBlue = document.getElementById('is-blue').checked;
         localStorage.setItem('selectedCountry', country);
         localStorage.setItem('isBlueActive', isBlue);
+        localStorage.setItem('secondCurrency', secondCurrency);
     }
 
     function loadPreferences() {
         const savedCountry = localStorage.getItem('selectedCountry');
         const savedBlue = localStorage.getItem('isBlueActive');
+        const savedSecond = localStorage.getItem('secondCurrency');
         if (savedCountry) document.getElementById('country-select').value = savedCountry;
         if (savedBlue !== null) document.getElementById('is-blue').checked = (savedBlue === 'true');
+        if (savedSecond && secondConfig[savedSecond]) secondCurrency = savedSecond;
     }
 
     function updateFlag() {
@@ -159,42 +228,63 @@
         document.getElementById('blue-area').style.display = (country === 'ars') ? 'block' : 'none';
     }
 
+    function updateSecondCurrencyUI() {
+        const cfg = secondConfig[secondCurrency];
+        document.getElementById('second-flag').src = `https://flagcdn.com/w40/${cfg.flag}.png`;
+        document.getElementById('second-label-text').textContent = cfg.label;
+        document.getElementById('second-currency').value = "";
+    }
+
+    function swapSecondCurrency() {
+        secondCurrency = (secondCurrency === 'usd') ? 'eur' : 'usd';
+        updateSecondCurrencyUI();
+        savePreferences();
+        // Recalculate from ILS if it has a value
+        const ilsVal = document.getElementById('ils').value;
+        if (ilsVal) calculate('ils');
+    }
+
     function handleEnter(event) {
         if (event.key === "Enter") {
             event.preventDefault();
-            document.getElementById('trap-1').focus(); 
+            document.getElementById('trap-1').focus();
         }
     }
 
-    // הפונקציה המעודכנת - מנקה רק את המספרים
     function resetAll() {
         document.getElementById('ils').value = "";
-        document.getElementById('usd').value = "";
+        document.getElementById('second-currency').value = "";
         document.getElementById('dynamic-input').value = "";
-        // לא מאפסים את המדינה ולא את ה-Checkbox, כך שהם נשמרים בזיכרון
     }
 
     function calculate(source) {
         if (!rates.usd) return;
         const ilsEl = document.getElementById('ils');
-        const usdEl = document.getElementById('usd');
+        const secondEl = document.getElementById('second-currency');
         const dynEl = document.getElementById('dynamic-input');
         const currency = document.getElementById('country-select').value;
         const isBlue = document.getElementById('is-blue').checked;
+
+        const secondRateKey = secondConfig[secondCurrency].rateKey;
+        const secondRate = rates[secondRateKey];
+
         let currentRate = rates[currency];
-        if (currency === 'ars' && isBlue) currentRate = currentRate * 1.25; 
+        if (currency === 'ars' && isBlue) currentRate = currentRate * 1.25;
+
         let baseIls;
         if (source === 'ils') baseIls = parseFloat(ilsEl.value);
-        else if (source === 'usd') baseIls = parseFloat(usdEl.value) / rates.usd;
+        else if (source === 'second') baseIls = parseFloat(secondEl.value) / secondRate;
         else if (source === 'dynamic') baseIls = parseFloat(dynEl.value) / currentRate;
+
         if (isNaN(baseIls)) {
-             if(source !== 'ils') ilsEl.value = "";
-             if(source !== 'usd') usdEl.value = "";
-             if(source !== 'dynamic') dynEl.value = "";
-             return;
+            if (source !== 'ils') ilsEl.value = "";
+            if (source !== 'second') secondEl.value = "";
+            if (source !== 'dynamic') dynEl.value = "";
+            return;
         }
+
         if (source !== 'ils') ilsEl.value = baseIls.toFixed(2);
-        if (source !== 'usd') usdEl.value = (baseIls * rates.usd).toFixed(2);
+        if (source !== 'second') secondEl.value = (baseIls * secondRate).toFixed(2);
         if (source !== 'dynamic') dynEl.value = (baseIls * currentRate).toFixed(2);
     }
 
